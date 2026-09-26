@@ -1,0 +1,366 @@
+﻿{
+  "info": {
+    "_postman_id": "c1f73b88-8ef7-47b2-b439-d3e7428f62f1",
+    "name": "Job Portal Backend API",
+    "description": "Complete REST API collection for Job Portal Backend covering Authentication (JWT & httpOnly cookies), Job Seekers, Employers, and Admin roles.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Register - Job Seeker",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Chigulla Gunith\",\n  \"email\": \"gunith.student@example.com\",\n  \"password\": \"seekerPassword123\",\n  \"role\": \"job_seeker\",\n  \"phone\": \"+91 9123456780\",\n  \"profile\": {\n    \"headline\": \"2nd Year CSE Undergrad | Full Stack MERN\",\n    \"bio\": \"Passionate coder looking for developer internships\",\n    \"skills\": [\"JavaScript\", \"React\", \"Node.js\", \"MongoDB\"],\n    \"resumeUrl\": \"https://drive.google.com/sample-resume-gunith.pdf\"\n  }\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Register - Employer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rajesh Sharma\",\n  \"email\": \"hr@innovatetech.com\",\n  \"password\": \"employerPassword123\",\n  \"role\": \"employer\",\n  \"phone\": \"+91 9876501234\",\n  \"companyDetails\": {\n    \"companyName\": \"InnovateTech Labs\",\n    \"website\": \"https://innovatetech.example.com\",\n    \"industry\": \"Information Technology\",\n    \"location\": \"Hyderabad, India\",\n    \"aboutCompany\": \"Building next-gen AI and cloud software products.\"\n  }\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Login - Job Seeker",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "    pm.collectionVariables.set('token', res.token);",
+                  "    console.log('Saved auth token to collection variables');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"gunith.cse@gmail.com\",\n  \"password\": \"seekerPassword123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login - Employer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "    pm.collectionVariables.set('token', res.token);",
+                  "    console.log('Saved employer token');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"recruiter@techcorp.in\",\n  \"password\": \"employerPassword123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "    pm.collectionVariables.set('token', res.token);",
+                  "    console.log('Saved admin token');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@jobportal.com\",\n  \"password\": \"adminPassword123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Get Current User (Me)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. User Profiles",
+      "item": [
+        {
+          "name": "Update Seeker Profile",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"headline\": \"MERN Stack Developer & Open Source Contributor\",\n  \"bio\": \"Passionate 2nd year CSE undergraduate with proven skills in Node.js and MongoDB.\",\n  \"skills\": [\"JavaScript\", \"React.js\", \"Node.js\", \"Express\", \"MongoDB\", \"REST APIs\", \"Git\"],\n  \"resumeUrl\": \"https://drive.google.com/updated-resume.pdf\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users/profile", "host": ["{{baseUrl}}"], "path": ["users", "profile"] }
+          }
+        },
+        {
+          "name": "Update Employer Company Profile",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"TechCorp Global India\",\n  \"website\": \"https://techcorp-india.com\",\n  \"industry\": \"Software Products & AI\",\n  \"location\": \"HITEC City, Hyderabad, India\",\n  \"aboutCompany\": \"Expanding rapid engineering teams across cloud and AI technologies.\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users/company", "host": ["{{baseUrl}}"], "path": ["users", "company"] }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"seekerPassword123\",\n  \"newPassword\": \"newSecurePass2026\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users/change-password", "host": ["{{baseUrl}}"], "path": ["users", "change-password"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Job Listings",
+      "item": [
+        {
+          "name": "Get All Jobs (Search & Filter)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/jobs?keyword=Developer&category=Backend Development&jobType=Full-time&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["jobs"],
+              "query": [
+                { "key": "keyword", "value": "Developer" },
+                { "key": "category", "value": "Backend Development" },
+                { "key": "jobType", "value": "Full-time" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Job By ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/jobs/:jobId", "host": ["{{baseUrl}}"], "path": ["jobs", ":jobId"] }
+          }
+        },
+        {
+          "name": "Create Job (Employer only)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Associate Software Engineer (Node.js & MongoDB)\",\n  \"description\": \"Looking for enthusiastic backend developers with solid knowledge of REST APIs and Mongoose.\",\n  \"company\": \"TechCorp Solutions India\",\n  \"location\": \"Hyderabad, Telangana\",\n  \"jobType\": \"Full-time\",\n  \"category\": \"Backend Development\",\n  \"experienceLevel\": \"Fresher\",\n  \"skillsRequired\": [\"Node.js\", \"Express\", \"MongoDB\", \"REST APIs\"],\n  \"salary\": {\n    \"min\": 650000,\n    \"max\": 950000,\n    \"currency\": \"INR\",\n    \"period\": \"per annum\"\n  },\n  \"openings\": 3\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/jobs", "host": ["{{baseUrl}}"], "path": ["jobs"] }
+          }
+        },
+        {
+          "name": "Get My Posted Jobs (Employer)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/jobs/my/listings", "host": ["{{baseUrl}}"], "path": ["jobs", "my", "listings"] }
+          }
+        },
+        {
+          "name": "Update Job (Employer)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"openings\": 5,\n  \"status\": \"Open\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/jobs/:jobId", "host": ["{{baseUrl}}"], "path": ["jobs", ":jobId"] }
+          }
+        },
+        {
+          "name": "Delete Job (Employer or Admin)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/jobs/:jobId", "host": ["{{baseUrl}}"], "path": ["jobs", ":jobId"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Applications",
+      "item": [
+        {
+          "name": "Apply for Job (Job Seeker)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"coverLetter\": \"I have built multiple real-world MERN stack projects and would love to contribute to TechCorp.\",\n  \"resumeUrl\": \"https://drive.google.com/sample-resume-gunith.pdf\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/applications/apply/:jobId", "host": ["{{baseUrl}}"], "path": ["applications", "apply", ":jobId"] }
+          }
+        },
+        {
+          "name": "Get My Applications (Job Seeker)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/applications/my", "host": ["{{baseUrl}}"], "path": ["applications", "my"] }
+          }
+        },
+        {
+          "name": "Withdraw Application (Job Seeker)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/applications/:applicationId", "host": ["{{baseUrl}}"], "path": ["applications", ":applicationId"] }
+          }
+        },
+        {
+          "name": "Get Job Applicants (Employer)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/applications/job/:jobId", "host": ["{{baseUrl}}"], "path": ["applications", "job", ":jobId"] }
+          }
+        },
+        {
+          "name": "Update Applicant Status (Employer - Shortlist/Reject)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Shortlisted\",\n  \"note\": \"Strong MERN experience noted in profile and GitHub repositories.\",\n  \"employerNotes\": \"Schedule Technical Round 1 on Google Meet\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/applications/:applicationId/status", "host": ["{{baseUrl}}"], "path": ["applications", ":applicationId", "status"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Admin",
+      "item": [
+        {
+          "name": "Get Platform Stats",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/admin/stats", "host": ["{{baseUrl}}"], "path": ["admin", "stats"] }
+          }
+        },
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?role=job_seeker",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users"],
+              "query": [{ "key": "role", "value": "job_seeker" }]
+            }
+          }
+        },
+        {
+          "name": "Update User Active Status (Admin)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": true\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/admin/users/:userId/status", "host": ["{{baseUrl}}"], "path": ["admin", "users", ":userId", "status"] }
+          }
+        },
+        {
+          "name": "Delete User (Admin)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/admin/users/:userId", "host": ["{{baseUrl}}"], "path": ["admin", "users", ":userId"] }
+          }
+        }
+      ]
+    }
+  ]
+}
