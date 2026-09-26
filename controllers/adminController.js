@@ -1,5 +1,13 @@
 ﻿// controllers/adminController.js
-// Handles administrative oversight: platform analytics, user moderation, and job moderation
+// Handles administrative features as specified in PDF Section 6:
+// - View all registered users
+// - View a user by ID
+// - Update user status when required
+// - Delete a user when required
+// - View all job postings
+// - View a job posting by ID
+// - Remove inappropriate or invalid job postings
+// - Review platform data through protected admin APIs (stats)
 
 const User = require('../models/User');
 const Job = require('../models/Job');
@@ -16,8 +24,8 @@ exports.getPlatformStats = async (req, res, next) => {
     const totalAdmins = await User.countDocuments({ role: 'admin' });
 
     const totalJobs = await Job.countDocuments();
-    const openJobs = await Job.countDocuments({ status: 'Open' });
-    const closedJobs = await Job.countDocuments({ status: 'Closed' });
+    const openJobs = await Job.countDocuments({ jobStatus: 'Open' });
+    const closedJobs = await Job.countDocuments({ jobStatus: 'Closed' });
 
     const totalApplications = await Application.countDocuments();
     const pendingApplications = await Application.countDocuments({ status: 'Pending' });
@@ -25,14 +33,9 @@ exports.getPlatformStats = async (req, res, next) => {
     const acceptedApplications = await Application.countDocuments({ status: 'Accepted' });
     const rejectedApplications = await Application.countDocuments({ status: 'Rejected' });
 
-    // Aggregation: jobs by category
-    const jobsByCategory = await Job.aggregate([
-      { $group: { _id: '$category', count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-    ]);
-
     res.status(200).json({
       success: true,
+      message: 'Platform statistics retrieved successfully',
       data: {
         users: {
           total: totalUsers,
@@ -44,7 +47,6 @@ exports.getPlatformStats = async (req, res, next) => {
           total: totalJobs,
           open: openJobs,
           closed: closedJobs,
-          byCategory: jobsByCategory,
         },
         applications: {
           total: totalApplications,
@@ -60,7 +62,7 @@ exports.getPlatformStats = async (req, res, next) => {
   }
 };
 
-// @desc    Get all users with optional role filtering and pagination
+// @desc    View all registered users
 // @route   GET /api/admin/users
 // @access  Private (Admin only)
 exports.getAllUsers = async (req, res, next) => {
@@ -95,7 +97,30 @@ exports.getAllUsers = async (req, res, next) => {
   }
 };
 
-// @desc    Toggle user active status or update role
+// @desc    View a user by ID
+// @route   GET /api/admin/users/:id
+// @access  Private (Admin only)
+exports.getUserById = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: `User not found with id: ${req.params.id}`,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update user status (activate/deactivate or role update)
 // @route   PUT /api/admin/users/:id/status
 // @access  Private (Admin only)
 exports.updateUserStatus = async (req, res, next) => {
@@ -132,7 +157,7 @@ exports.updateUserStatus = async (req, res, next) => {
   }
 };
 
-// @desc    Delete user and all associated jobs/applications
+// @desc    Delete a user when required
 // @route   DELETE /api/admin/users/:id
 // @access  Private (Admin only)
 exports.deleteUser = async (req, res, next) => {
@@ -146,7 +171,7 @@ exports.deleteUser = async (req, res, next) => {
       });
     }
 
-    // If employer is deleted, delete their jobs and applications
+    // Cascade delete user jobs and applications
     if (user.role === 'employer') {
       const jobs = await Job.find({ employer: user._id });
       const jobIds = jobs.map((j) => j._id);
@@ -154,7 +179,6 @@ exports.deleteUser = async (req, res, next) => {
       await Job.deleteMany({ employer: user._id });
     }
 
-    // If job seeker is deleted, remove their applications and decrement counts
     if (user.role === 'job_seeker') {
       const applications = await Application.find({ applicant: user._id });
       for (const app of applications) {
@@ -168,6 +192,78 @@ exports.deleteUser = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: 'User and all associated data deleted successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    View all job postings (platform-wide)
+// @route   GET /api/admin/jobs
+// @access  Private (Admin only)
+exports.getAllJobsAdmin = async (req, res, next) => {
+  try {
+    const jobs = await Job.find()
+      .populate('employer', 'name email companyDetails')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: jobs.length,
+      data: jobs,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    View a job posting by ID
+// @route   GET /api/admin/jobs/:id
+// @access  Private (Admin only)
+exports.getJobByIdAdmin = async (req, res, next) => {
+  try {
+    const job = await Job.findById(req.params.id).populate(
+      'employer',
+      'name email companyDetails'
+    );
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: `Job not found with id: ${req.params.id}`,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: job,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Remove inappropriate or invalid job postings
+// @route   DELETE /api/admin/jobs/:id
+// @access  Private (Admin only)
+exports.deleteJobAdmin = async (req, res, next) => {
+  try {
+    const job = await Job.findById(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: `Job not found with id: ${req.params.id}`,
+      });
+    }
+
+    // Delete associated applications
+    await Application.deleteMany({ job: job._id });
+    await job.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: 'Job posting removed by administrator',
     });
   } catch (error) {
     next(error);

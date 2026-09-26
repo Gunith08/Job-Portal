@@ -1,8 +1,8 @@
-﻿{
+{
   "info": {
-    "_postman_id": "c1f73b88-8ef7-47b2-b439-d3e7428f62f1",
-    "name": "Job Portal Backend API",
-    "description": "Complete REST API collection for Job Portal Backend covering Authentication (JWT & httpOnly cookies), Job Seekers, Employers, and Admin roles.",
+    "_postman_id": "b3e0c0d1-7fa1-4a25-8857-jobportal2026",
+    "name": "Job Portal Backend API - MastersCoding Mini Project",
+    "description": "Complete REST API test collection for MastersCoding Backend Mini Project (Node.js + Express.js + MongoDB).\nIncludes tests for registration, authentication cookies, JWT tokens, RBAC roles (Job Seeker, Employer, Admin), CRUD operations, validation errors, and unauthorized access attempts as required by Section 9 of the project brief.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -12,37 +12,116 @@
       "type": "string"
     },
     {
-      "key": "token",
+      "key": "seekerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "employerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sampleJobId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sampleApplicationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sampleUserId",
       "value": "",
       "type": "string"
     }
   ],
   "item": [
     {
-      "name": "1. Authentication",
+      "name": "1. Authentication & Session",
       "item": [
         {
           "name": "Register - Job Seeker",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () { pm.response.to.have.status(201); });",
+                  "const res = pm.response.json();",
+                  "if (res.token) { pm.collectionVariables.set(\"seekerToken\", res.token); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Chigulla Gunith\",\n  \"email\": \"gunith.student@example.com\",\n  \"password\": \"seekerPassword123\",\n  \"role\": \"job_seeker\",\n  \"phone\": \"+91 9123456780\",\n  \"profile\": {\n    \"headline\": \"2nd Year CSE Undergrad | Full Stack MERN\",\n    \"bio\": \"Passionate coder looking for developer internships\",\n    \"skills\": [\"JavaScript\", \"React\", \"Node.js\", \"MongoDB\"],\n    \"resumeUrl\": \"https://drive.google.com/sample-resume-gunith.pdf\"\n  }\n}"
+              "raw": "{\n  \"name\": \"Chigulla Gunith Sai Anjaneya\",\n  \"email\": \"gunith.student@example.com\",\n  \"password\": \"seekerPassword123\",\n  \"role\": \"job_seeker\",\n  \"phone\": \"+91 9123456780\",\n  \"profile\": {\n    \"headline\": \"2nd Year CSE Undergrad | Full Stack Developer\",\n    \"bio\": \"Passionate coder skilled in Node.js, Express, and MongoDB.\",\n    \"skills\": [\n      \"JavaScript\",\n      \"Node.js\",\n      \"MongoDB\",\n      \"React\"\n    ],\n    \"resumeUrl\": \"https://drive.google.com/sample-resume.pdf\"\n  }\n}"
             },
-            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
           }
         },
         {
           "name": "Register - Employer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () { pm.response.to.have.status(201); });",
+                  "const res = pm.response.json();",
+                  "if (res.token) { pm.collectionVariables.set(\"employerToken\", res.token); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Rajesh Sharma\",\n  \"email\": \"hr@innovatetech.com\",\n  \"password\": \"employerPassword123\",\n  \"role\": \"employer\",\n  \"phone\": \"+91 9876501234\",\n  \"companyDetails\": {\n    \"companyName\": \"InnovateTech Labs\",\n    \"website\": \"https://innovatetech.example.com\",\n    \"industry\": \"Information Technology\",\n    \"location\": \"Hyderabad, India\",\n    \"aboutCompany\": \"Building next-gen AI and cloud software products.\"\n  }\n}"
+              "raw": "{\n  \"name\": \"Vikram Mehta\",\n  \"email\": \"recruiter@techcorp.in\",\n  \"password\": \"employerPassword123\",\n  \"role\": \"employer\",\n  \"phone\": \"+91 9812345678\",\n  \"companyDetails\": {\n    \"companyName\": \"TechCorp Solutions\",\n    \"website\": \"https://techcorp.example.in\",\n    \"location\": \"Hyderabad, India\",\n    \"aboutCompany\": \"Building scalable web and cloud products.\"\n  }\n}"
             },
-            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
           }
         },
         {
@@ -52,11 +131,9 @@
               "listen": "test",
               "script": {
                 "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
                   "const res = pm.response.json();",
-                  "if (res.token) {",
-                  "    pm.collectionVariables.set('token', res.token);",
-                  "    console.log('Saved auth token to collection variables');",
-                  "}"
+                  "if (res.token) { pm.collectionVariables.set(\"seekerToken\", res.token); }"
                 ],
                 "type": "text/javascript"
               }
@@ -64,12 +141,26 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"gunith.cse@gmail.com\",\n  \"password\": \"seekerPassword123\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
           }
         },
         {
@@ -79,11 +170,9 @@
               "listen": "test",
               "script": {
                 "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
                   "const res = pm.response.json();",
-                  "if (res.token) {",
-                  "    pm.collectionVariables.set('token', res.token);",
-                  "    console.log('Saved employer token');",
-                  "}"
+                  "if (res.token) { pm.collectionVariables.set(\"employerToken\", res.token); }"
                 ],
                 "type": "text/javascript"
               }
@@ -91,12 +180,26 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"recruiter@techcorp.in\",\n  \"password\": \"employerPassword123\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
           }
         },
         {
@@ -106,11 +209,9 @@
               "listen": "test",
               "script": {
                 "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
                   "const res = pm.response.json();",
-                  "if (res.token) {",
-                  "    pm.collectionVariables.set('token', res.token);",
-                  "    console.log('Saved admin token');",
-                  "}"
+                  "if (res.token) { pm.collectionVariables.set(\"adminToken\", res.token); }"
                 ],
                 "type": "text/javascript"
               }
@@ -118,246 +219,1120 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"admin@jobportal.com\",\n  \"password\": \"adminPassword123\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
-          }
-        },
-        {
-          "name": "Get Current User (Me)",
-          "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
-          }
-        },
-        {
-          "name": "Logout",
-          "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
-            "method": "POST",
-            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] }
-          }
-        }
-      ]
-    },
-    {
-      "name": "2. User Profiles",
-      "item": [
-        {
-          "name": "Update Seeker Profile",
-          "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"headline\": \"MERN Stack Developer & Open Source Contributor\",\n  \"bio\": \"Passionate 2nd year CSE undergraduate with proven skills in Node.js and MongoDB.\",\n  \"skills\": [\"JavaScript\", \"React.js\", \"Node.js\", \"Express\", \"MongoDB\", \"REST APIs\", \"Git\"],\n  \"resumeUrl\": \"https://drive.google.com/updated-resume.pdf\"\n}"
-            },
-            "url": { "raw": "{{baseUrl}}/users/profile", "host": ["{{baseUrl}}"], "path": ["users", "profile"] }
-          }
-        },
-        {
-          "name": "Update Employer Company Profile",
-          "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"companyName\": \"TechCorp Global India\",\n  \"website\": \"https://techcorp-india.com\",\n  \"industry\": \"Software Products & AI\",\n  \"location\": \"HITEC City, Hyderabad, India\",\n  \"aboutCompany\": \"Expanding rapid engineering teams across cloud and AI technologies.\"\n}"
-            },
-            "url": { "raw": "{{baseUrl}}/users/company", "host": ["{{baseUrl}}"], "path": ["users", "company"] }
-          }
-        },
-        {
-          "name": "Change Password",
-          "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"currentPassword\": \"seekerPassword123\",\n  \"newPassword\": \"newSecurePass2026\"\n}"
-            },
-            "url": { "raw": "{{baseUrl}}/users/change-password", "host": ["{{baseUrl}}"], "path": ["users", "change-password"] }
-          }
-        }
-      ]
-    },
-    {
-      "name": "3. Job Listings",
-      "item": [
-        {
-          "name": "Get All Jobs (Search & Filter)",
-          "request": {
-            "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/jobs?keyword=Developer&category=Backend Development&jobType=Full-time&page=1&limit=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["jobs"],
-              "query": [
-                { "key": "keyword", "value": "Developer" },
-                { "key": "category", "value": "Backend Development" },
-                { "key": "jobType", "value": "Full-time" },
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "10" }
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
               ]
             }
           }
         },
         {
-          "name": "Get Job By ID",
+          "name": "Get Current User (Me)",
           "request": {
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/jobs/:jobId", "host": ["{{baseUrl}}"], "path": ["jobs", ":jobId"] }
-          }
-        },
-        {
-          "name": "Create Job (Employer only)",
-          "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Associate Software Engineer (Node.js & MongoDB)\",\n  \"description\": \"Looking for enthusiastic backend developers with solid knowledge of REST APIs and Mongoose.\",\n  \"company\": \"TechCorp Solutions India\",\n  \"location\": \"Hyderabad, Telangana\",\n  \"jobType\": \"Full-time\",\n  \"category\": \"Backend Development\",\n  \"experienceLevel\": \"Fresher\",\n  \"skillsRequired\": [\"Node.js\", \"Express\", \"MongoDB\", \"REST APIs\"],\n  \"salary\": {\n    \"min\": 650000,\n    \"max\": 950000,\n    \"currency\": \"INR\",\n    \"period\": \"per annum\"\n  },\n  \"openings\": 3\n}"
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{seekerToken}}",
+                  "type": "string"
+                }
+              ]
             },
-            "url": { "raw": "{{baseUrl}}/jobs", "host": ["{{baseUrl}}"], "path": ["jobs"] }
-          }
-        },
-        {
-          "name": "Get My Posted Jobs (Employer)",
-          "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/jobs/my/listings", "host": ["{{baseUrl}}"], "path": ["jobs", "my", "listings"] }
-          }
-        },
-        {
-          "name": "Update Job (Employer)",
-          "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"openings\": 5,\n  \"status\": \"Open\"\n}"
-            },
-            "url": { "raw": "{{baseUrl}}/jobs/:jobId", "host": ["{{baseUrl}}"], "path": ["jobs", ":jobId"] }
-          }
-        },
-        {
-          "name": "Delete Job (Employer or Admin)",
-          "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
-            "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/jobs/:jobId", "host": ["{{baseUrl}}"], "path": ["jobs", ":jobId"] }
-          }
-        }
-      ]
-    },
-    {
-      "name": "4. Applications",
-      "item": [
-        {
-          "name": "Apply for Job (Job Seeker)",
-          "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"coverLetter\": \"I have built multiple real-world MERN stack projects and would love to contribute to TechCorp.\",\n  \"resumeUrl\": \"https://drive.google.com/sample-resume-gunith.pdf\"\n}"
-            },
-            "url": { "raw": "{{baseUrl}}/applications/apply/:jobId", "host": ["{{baseUrl}}"], "path": ["applications", "apply", ":jobId"] }
-          }
-        },
-        {
-          "name": "Get My Applications (Job Seeker)",
-          "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/applications/my", "host": ["{{baseUrl}}"], "path": ["applications", "my"] }
-          }
-        },
-        {
-          "name": "Withdraw Application (Job Seeker)",
-          "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
-            "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/applications/:applicationId", "host": ["{{baseUrl}}"], "path": ["applications", ":applicationId"] }
-          }
-        },
-        {
-          "name": "Get Job Applicants (Employer)",
-          "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/applications/job/:jobId", "host": ["{{baseUrl}}"], "path": ["applications", "job", ":jobId"] }
-          }
-        },
-        {
-          "name": "Update Applicant Status (Employer - Shortlist/Reject)",
-          "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"Shortlisted\",\n  \"note\": \"Strong MERN experience noted in profile and GitHub repositories.\",\n  \"employerNotes\": \"Schedule Technical Round 1 on Google Meet\"\n}"
-            },
-            "url": { "raw": "{{baseUrl}}/applications/:applicationId/status", "host": ["{{baseUrl}}"], "path": ["applications", ":applicationId", "status"] }
-          }
-        }
-      ]
-    },
-    {
-      "name": "5. Admin",
-      "item": [
-        {
-          "name": "Get Platform Stats",
-          "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/admin/stats", "host": ["{{baseUrl}}"], "path": ["admin", "stats"] }
-          }
-        },
-        {
-          "name": "Get All Users (Admin)",
-          "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/admin/users?role=job_seeker",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "users"],
-              "query": [{ "key": "role", "value": "job_seeker" }]
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
             }
           }
         },
         {
-          "name": "Update User Active Status (Admin)",
+          "name": "Logout & Clear Cookie",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{seekerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Security & Edge Case Tests (Section 9)",
+      "item": [
+        {
+          "name": "Test: Request Without Authentication",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Expect 401 Unauthorized\", function () { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/applications/my",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "my"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Test: Request With Invalid / Expired Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Expect 401 Unauthorized\", function () { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "invalid_dummy_token",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Test: Job Seeker Forbidden from Posting Job (RBAC)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Expect 403 Forbidden for Seeker posting job\", function () { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{seekerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Forbidden Job\",\n  \"description\": \"Seekers cannot post jobs\",\n  \"company\": \"None\",\n  \"location\": \"Remote\",\n  \"salary\": {\n    \"min\": 100000,\n    \"max\": 200000\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/jobs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "jobs"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Test: Employer Forbidden from Applying (RBAC)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Expect 403 Forbidden for Employer applying\", function () { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{employerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"coverLetter\": \"Employers cannot apply\",\n  \"resumeUrl\": \"https://sample.pdf\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/applications/apply/{{sampleJobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "apply",
+                "{{sampleJobId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Test: Non-Admin Forbidden from Admin Endpoints",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Expect 403 Forbidden on admin route\", function () { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{seekerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/admin/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Test: Validation Error on Invalid Input",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Expect 400 Bad Request on missing fields\", function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"missing-password@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Job Seeker Features",
+      "item": [
+        {
+          "name": "View Own Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{seekerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Own Profile (Skills, Education, Experience)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{seekerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"headline\": \"2nd Year CSE Undergrad | Full Stack MERN Developer\",\n  \"bio\": \"Passionate computer science student building scalable backend REST APIs.\",\n  \"skills\": [\n    \"JavaScript\",\n    \"Node.js\",\n    \"Express.js\",\n    \"MongoDB\",\n    \"React\",\n    \"Git\"\n  ],\n  \"education\": [\n    {\n      \"institution\": \"VNRVJIET\",\n      \"degree\": \"B.Tech CSE\",\n      \"yearOfPassing\": 2028,\n      \"gradeOrPercentage\": \"9.2 CGPA\"\n    }\n  ],\n  \"experience\": [\n    {\n      \"company\": \"Coding Club\",\n      \"position\": \"Backend Lead\",\n      \"years\": 1,\n      \"description\": \"Built REST APIs\"\n    }\n  ],\n  \"resumeUrl\": \"https://drive.google.com/sample-resume-gunith.pdf\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "View All Available Jobs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.length > 0) { pm.collectionVariables.set(\"sampleJobId\", res.data[0]._id); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/jobs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "jobs"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search & Filter Jobs (keyword, category, location)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/jobs?keyword=Developer&location=Hyderabad&employmentType=Full-time&page=1&limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "jobs"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "Developer"
+                },
+                {
+                  "key": "location",
+                  "value": "Hyderabad"
+                },
+                {
+                  "key": "employmentType",
+                  "value": "Full-time"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "View Single Job by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/jobs/{{sampleJobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "jobs",
+                "{{sampleJobId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Apply for a Job",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data._id) { pm.collectionVariables.set(\"sampleApplicationId\", res.data._id); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{seekerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"coverLetter\": \"I have strong hands-on experience in MERN backend development and REST APIs.\",\n  \"resumeUrl\": \"https://drive.google.com/sample-resume-gunith.pdf\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/applications/apply/{{sampleJobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "apply",
+                "{{sampleJobId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Test: Prevent Duplicate Application to Same Job",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Expect 400 Bad Request on duplicate application\", function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{seekerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"coverLetter\": \"Attempting to apply a second time to test unique compound index constraint.\",\n  \"resumeUrl\": \"https://drive.google.com/sample-resume-gunith.pdf\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/applications/apply/{{sampleJobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "apply",
+                "{{sampleJobId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "View My Submitted Applications & Status",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{seekerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/applications/my",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "my"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Withdraw Application",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{seekerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{sampleApplicationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{sampleApplicationId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Employer Features",
+      "item": [
+        {
+          "name": "Update Employer Company Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{employerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"TechCorp Solutions India\",\n  \"website\": \"https://techcorp-india.example.com\",\n  \"industry\": \"Information Technology\",\n  \"location\": \"Hyderabad, India\",\n  \"aboutCompany\": \"Enterprise cloud software provider.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/company",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "company"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create a New Job Posting",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data._id) { pm.collectionVariables.set(\"sampleJobId\", res.data._id); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{employerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Junior Backend Developer (Node.js & MongoDB)\",\n  \"description\": \"Build RESTful APIs and design schemas using Mongoose.\",\n  \"company\": \"TechCorp Solutions India\",\n  \"location\": \"Hyderabad, India\",\n  \"employmentType\": \"Full-time\",\n  \"salary\": {\n    \"min\": 600000,\n    \"max\": 900000,\n    \"currency\": \"INR\",\n    \"period\": \"per annum\"\n  },\n  \"requiredSkills\": [\n    \"Node.js\",\n    \"Express\",\n    \"MongoDB\",\n    \"REST APIs\"\n  ],\n  \"experienceRequirement\": \"Junior (1-3 yrs)\",\n  \"openings\": 2,\n  \"jobStatus\": \"Open\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/jobs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "jobs"
+              ]
+            }
+          }
+        },
+        {
+          "name": "View Own Job Postings",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{employerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/jobs/my/listings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "jobs",
+                "my",
+                "listings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "View a Specific Job Posting",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/jobs/{{sampleJobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "jobs",
+                "{{sampleJobId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Own Job Posting",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{employerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"openings\": 4,\n  \"jobStatus\": \"Open\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/jobs/{{sampleJobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "jobs",
+                "{{sampleJobId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "View Applications Received for Job",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{employerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/applications/job/{{sampleJobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "job",
+                "{{sampleJobId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Application Status (Shortlist / Reject)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{employerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Shortlisted\",\n  \"note\": \"Profile matched the backend criteria.\",\n  \"employerNotes\": \"Schedule technical interview\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{sampleApplicationId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{sampleApplicationId}}",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Own Job Posting",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{employerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/jobs/{{sampleJobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "jobs",
+                "{{sampleJobId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Admin Features",
+      "item": [
+        {
+          "name": "Review Platform Stats & Metrics",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/admin/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "View All Registered Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.length > 0) { pm.collectionVariables.set(\"sampleUserId\", res.data[0]._id); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "View User by ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{sampleUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{sampleUserId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update User Status",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"isActive\": true\n}"
             },
-            "url": { "raw": "{{baseUrl}}/admin/users/:userId/status", "host": ["{{baseUrl}}"], "path": ["admin", "users", ":userId", "status"] }
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{sampleUserId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{sampleUserId}}",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "View All Job Postings (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/admin/jobs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "jobs"
+              ]
+            }
+          }
+        },
+        {
+          "name": "View Job Posting by ID (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/admin/jobs/{{sampleJobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "jobs",
+                "{{sampleJobId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remove Inappropriate Job Posting (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/admin/jobs/{{sampleJobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "jobs",
+                "{{sampleJobId}}"
+              ]
+            }
           }
         },
         {
           "name": "Delete User (Admin)",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/admin/users/:userId", "host": ["{{baseUrl}}"], "path": ["admin", "users", ":userId"] }
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{sampleUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{sampleUserId}}"
+              ]
+            }
           }
         }
       ]

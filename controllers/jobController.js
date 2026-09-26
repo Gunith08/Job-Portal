@@ -9,11 +9,22 @@ const Application = require('../models/Application');
 // @access  Public
 exports.getAllJobs = async (req, res, next) => {
   try {
-    const { keyword, category, jobType, location, minSalary, maxSalary, sort, page = 1, limit = 10 } = req.query;
+    const {
+      keyword,
+      category,
+      jobType,
+      employmentType,
+      location,
+      minSalary,
+      maxSalary,
+      sort,
+      page = 1,
+      limit = 10,
+    } = req.query;
 
-    const query = { status: 'Open' };
+    const query = { jobStatus: 'Open' };
 
-    // Search by title or description keyword
+    // Search by title, description, or company
     if (keyword) {
       query.$or = [
         { title: { $regex: keyword, $options: 'i' } },
@@ -27,9 +38,10 @@ exports.getAllJobs = async (req, res, next) => {
       query.category = category;
     }
 
-    // Filter by Job Type (Full-time, Internship, etc.)
-    if (jobType) {
-      query.jobType = jobType;
+    // Filter by Employment / Job Type
+    const typeFilter = employmentType || jobType;
+    if (typeFilter) {
+      query.employmentType = typeFilter;
     }
 
     // Filter by Location
@@ -50,8 +62,8 @@ exports.getAllJobs = async (req, res, next) => {
     const startIndex = (pageNum - 1) * limitNum;
 
     // Sorting
-    let sortBy = { createdAt: -1 }; // Default: Newest first
-    if (sort === 'oldest') sortBy = { createdAt: 1 };
+    let sortBy = { postedDate: -1 };
+    if (sort === 'oldest') sortBy = { postedDate: 1 };
     if (sort === 'salaryHigh') sortBy = { 'salary.max': -1 };
     if (sort === 'salaryLow') sortBy = { 'salary.min': 1 };
 
@@ -109,33 +121,52 @@ exports.createJob = async (req, res, next) => {
   try {
     const {
       title,
-      description,
+      jobTitle,
       company,
+      companyName,
+      description,
       location,
+      employmentType,
       jobType,
       category,
+      experienceRequirement,
       experienceLevel,
+      requiredSkills,
       skillsRequired,
       salary,
       openings,
+      applicationDeadline,
       deadline,
     } = req.body;
 
-    // Default company name from user companyDetails if not explicitly provided
-    const hiringCompany = company || req.user.companyDetails?.companyName || req.user.name;
+    const finalTitle = title || jobTitle;
+    const finalCompany =
+      company || companyName || req.user.companyDetails?.companyName || req.user.name;
+    const finalEmploymentType = employmentType || jobType || 'Full-time';
+    const finalSkills = requiredSkills || skillsRequired || [];
+    const finalExperience = experienceRequirement || experienceLevel || 'Fresher';
+    const finalDeadline = applicationDeadline || deadline;
+
+    if (!finalTitle || !description || !location || !salary) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide job title, description, location, and salary range',
+      });
+    }
 
     const job = await Job.create({
-      title,
+      title: finalTitle,
+      company: finalCompany,
       description,
-      company: hiringCompany,
       location,
-      jobType,
-      category,
-      experienceLevel,
-      skillsRequired,
+      employmentType: finalEmploymentType,
+      category: category || 'Software Development',
+      experienceRequirement: finalExperience,
+      requiredSkills: finalSkills,
       salary,
-      openings,
-      deadline,
+      openings: openings || 1,
+      applicationDeadline: finalDeadline,
+      jobStatus: 'Open',
       employer: req.user.id,
     });
 
@@ -163,11 +194,11 @@ exports.updateJob = async (req, res, next) => {
       });
     }
 
-    // Verify ownership: only job creator or admin can update
+    // Authorization rule: employer can update only their own job; admin can update any
     if (job.employer.toString() !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
-        message: 'You are not authorized to edit this job posting',
+        message: 'Forbidden: You are not authorized to edit this job posting',
       });
     }
 
@@ -200,18 +231,16 @@ exports.deleteJob = async (req, res, next) => {
       });
     }
 
-    // Verify ownership
+    // Authorization rule: employer can delete only their own job; admin can delete any
     if (job.employer.toString() !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
-        message: 'You are not authorized to delete this job posting',
+        message: 'Forbidden: You are not authorized to delete this job posting',
       });
     }
 
     // Delete associated applications
     await Application.deleteMany({ job: job._id });
-
-    // Delete job
     await job.deleteOne();
 
     res.status(200).json({

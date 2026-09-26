@@ -1,125 +1,209 @@
 ﻿# 💼 Job Portal Backend REST API
+### MastersCoding • Backend Development Mini Project (Node.js + Express.js + MongoDB)
 
-A full-fledged, real-world Job Portal Backend REST API built using the **MERN** backend stack (**Node.js**, **Express.js**, **MongoDB**, and **Mongoose**).
+A complete, secure, role-based REST API for a real-world **Job Portal** where **Job Seekers** can discover and apply for jobs, **Employers** can create and manage job postings, and **Admins** can maintain and moderate the platform.
 
-This project was built from scratch to demonstrate production-grade backend engineering concepts: **RESTful architecture**, **JWT Authentication** with **httpOnly cookies**, **password hashing with bcryptjs**, **Role-Based Access Control (RBAC)** across three user roles (**Job Seeker**, **Employer**, and **Admin**), **Embedded & Referenced Mongoose document models**, and **Postman API testing**.
-
----
-
-## 🚀 Key Features & Concepts Covered
-
-1. **RESTful API Design**: Clean URL conventions, standard HTTP status codes (`200`, `201`, `400`, `401`, `403`, `404`, `500`), resource-oriented routing.
-2. **MongoDB & Mongoose**:
-   - **Referenced Documents**: `Job` references `User` (Employer), `Application` references `Job`, `User` (Applicant), and `User` (Employer).
-   - **Embedded Documents**:
-     - Job Seeker's skills, education history, and experience details are embedded subdocuments in the `User` schema.
-     - Recruiter's company details are embedded in the `User` schema.
-     - `Application` stores an embedded `applicantSnapshot` (preserving applicant data at the time of application) and an embedded `statusHistory` array tracking every stage transition.
-   - **Compound Indexes**: Unique compound index `{ job: 1, applicant: 1 }` prevents candidates from applying multiple times to the same job listing.
-3. **Authentication & Security**:
-   - Password hashing with **`bcryptjs`** using salt rounds in a Mongoose `pre('save')` middleware hook.
-   - **JSON Web Tokens (JWT)** generated on register/login and sent via **`httpOnly` secure cookies** (mitigating XSS attacks).
-   - Fallback support for `Authorization: Bearer <token>` header for convenient Postman and mobile client testing.
-4. **Role-Based Access Control (RBAC)**:
-   - Three distinct roles: `job_seeker`, `employer`, and `admin`.
-   - Granular middleware `protect` and `authorize('employer', 'admin')` protecting sensitive endpoints.
-5. **Search, Filtering & Pagination**:
-   - Filter jobs by keyword, category, job type (Full-time, Internship, Remote, etc.), location, and salary range.
-   - Sort by newest, oldest, highest salary, and lowest salary with page-based pagination.
-6. **Postman API Collection**:
-   - Ready-to-import Postman collection with automatic token capture scripts for seamless testing.
+Built by **Chigulla Gunith Sai Anjaneya** (2nd Year B.Tech CSE, VNRVJIET).
 
 ---
 
-## 👥 User Roles & Permissions Matrix
+## 📋 Table of Contents
+1. [Project Overview](#-project-overview)
+2. [Technology Stack](#-technology-stack)
+3. [User Roles & Access Matrix](#-user-roles--access-matrix)
+4. [Database Design & Architecture (Design Exercise)](#-database-design--architecture-design-exercise)
+5. [Authentication & Security Implementation](#-authentication--security-implementation)
+6. [API Endpoints Reference](#-api-endpoints-reference)
+7. [Installation & Setup](#-installation--setup)
+8. [Database Seeder & Test Credentials](#-database-seeder--test-credentials)
+9. [Postman API Testing Guide](#-postman-api-testing-guide)
+10. [Submission Checklist](#-submission-checklist)
 
-| Feature / Action | Job Seeker | Employer | Admin |
+---
+
+## 🎯 Project Overview
+
+This is a backend-only REST API system that connects Job Seekers, Employers, and Administrators through a secure architecture.
+
+### Core Application Flow:
+1. A new user registers with the appropriate role (`job_seeker` or `employer`).
+2. The user logs in and receives a JWT stored in an `httpOnly` cookie.
+3. Authentication middleware (`protect`) verifies the JWT before protected operations.
+4. Role-verification middleware (`authorize`) ensures each user can only perform actions allowed for their role.
+5. Employers create, update, and manage their job postings.
+6. Job Seekers browse open jobs, apply with resumes, and track their application statuses.
+7. Employers review candidate applications received for their job postings and update statuses (e.g., Shortlisted, Interviewing, Accepted, Rejected).
+8. Admins inspect platform statistics, moderate user accounts, and remove inappropriate job postings.
+
+---
+
+## 🛠️ Technology Stack
+
+| Component | Technology | Purpose |
+|---|---|---|
+| **Runtime** | Node.js (v18+) | JavaScript execution engine |
+| **Backend Framework** | Express.js | Routing, middleware, RESTful API architecture |
+| **Database** | MongoDB | Document-oriented NoSQL database |
+| **ODM** | Mongoose (v8.x) | Data schemas, validations, subdocuments, and relationships |
+| **Authentication** | JSON Web Tokens (`jsonwebtoken`) | Stateless token-based user verification |
+| **Password Security** | `bcryptjs` | Salted password hashing (10 salt rounds) |
+| **Authentication Storage** | `httpOnly` Cookies (`cookie-parser`) | Secure cookie storage immune to XSS attacks |
+| **API Testing** | Postman | End-to-end testing with pre-built test assertions |
+| **Configuration** | `dotenv` | Environment variables management (`.env`) |
+
+---
+
+## 👥 User Roles & Access Matrix
+
+| Capabilities | Job Seeker | Employer | Admin |
 |---|:---:|:---:|:---:|
 | Register / Login / Logout | ✅ | ✅ | ✅ (Login/Logout) |
-| Manage Personal Profile & Resume | ✅ | ❌ | ❌ |
-| Manage Company Profile | ❌ | ✅ | ❌ |
-| Search & Browse Open Jobs | ✅ | ✅ | ✅ |
-| Post New Job Listings | ❌ | ✅ | ❌ |
-| Edit / Delete Own Job Listings | ❌ | ✅ | ✅ (Any job) |
-| Apply for Jobs with Resume | ✅ | ❌ | ❌ |
-| Track My Applications & Withdraw | ✅ | ❌ | ❌ |
-| View Applicants for Posted Jobs | ❌ | ✅ | ✅ |
-| Update Applicant Status (Shortlist/Reject) | ❌ | ✅ | ✅ |
-| View Platform Analytics & Stats | ❌ | ❌ | ✅ |
-| Moderation: Manage/Delete Users | ❌ | ❌ | ✅ |
+| View & Update Own Profile | ✅ | ✅ (Company profile) | ❌ |
+| View All Available Jobs (Public) | ✅ | ✅ | ✅ |
+| View Single Job by ID (Public) | ✅ | ✅ | ✅ |
+| Create New Job Postings | ❌ | ✅ | ❌ |
+| View Own Job Postings | ❌ | ✅ | ❌ |
+| Update & Delete Own Job Postings | ❌ | ✅ | ✅ (Any Job) |
+| Apply for Jobs | ✅ | ❌ | ❌ |
+| Prevent Duplicate Applications to Same Job | ✅ (Enforced) | — | — |
+| View My Submitted Applications & Status | ✅ | ❌ | ❌ |
+| Withdraw Application | ✅ | ❌ | ❌ |
+| View Applications for Posted Jobs | ❌ | ✅ (Own jobs) | ✅ (All jobs) |
+| Update Applicant Status (Shortlist/Reject) | ❌ | ✅ (Own jobs) | ✅ |
+| View Platform Analytics & Metrics | ❌ | ❌ | ✅ |
+| View All Users & View User by ID | ❌ | ❌ | ✅ |
+| Update User Status (Active/Inactive/Role) | ❌ | ❌ | ✅ |
+| Delete User (Cascade cleanup) | ❌ | ❌ | ✅ |
 
 ---
 
-## 📁 Project Architecture & Folder Structure
+## 💡 Database Design & Architecture (Design Exercise)
 
-```
-Job-Portal/
-├── config/
-│   └── db.js                        # MongoDB Mongoose connection setup
-├── controllers/
-│   ├── authController.js            # Register, login, logout, getMe
-│   ├── userController.js            # Seeker profile & employer company updates
-│   ├── jobController.js             # Job CRUD, search, filter, pagination
-│   ├── applicationController.js     # Job applications & status pipeline
-│   └── adminController.js           # Platform metrics & user moderation
-├── middleware/
-│   ├── authMiddleware.js            # JWT verification & RBAC authorization
-│   └── errorMiddleware.js           # Centralized 404 & error handlers
-├── models/
-│   ├── User.js                      # User model with embedded profile & companyDetails
-│   ├── Job.js                       # Job model referencing User (employer)
-│   └── Application.js               # Application model with embedded snapshot & history
-├── routes/
-│   ├── authRoutes.js                # /api/auth
-│   ├── userRoutes.js                # /api/users
-│   ├── jobRoutes.js                 # /api/jobs
-│   ├── applicationRoutes.js         # /api/applications
-│   └── adminRoutes.js               # /api/admin
-├── utils/
-│   └── generateToken.js             # JWT signer & httpOnly cookie dispatcher
-├── .env.example                     # Sample environment variable template
-├── .gitignore                       # Ignored files (node_modules, .env)
-├── Job_Portal_API.postman_collection.json # Ready-to-test Postman collection
-├── package.json                     # Project manifest and scripts
-├── seeder.js                        # Demo data populator script
-└── server.js                        # Express server entry point
-```
+> ### 🧠 Design Exercise Rationale: Embedded vs. Referenced Documents
+> **Architecture Principle applied**:
+> *“Choose embedding when the data belongs naturally to its parent and is usually read or updated together. Choose references when the related data has its own identity, lifecycle, or is shared across multiple documents.”*
 
----
+### 1. `User` Model
+- **Account & Security (Root)**: `name`, `email` (unique, lowercase), `password` (hashed with bcryptjs, `select: false`), `role` (`job_seeker`, `employer`, `admin`), `phone`, `isActive`.
+- **Embedded `profile` (Job Seeker)**:
+  - `skills`: String array `[String]`
+  - `education`: `[{ institution, degree, yearOfPassing, gradeOrPercentage }]`
+  - `experience`: `[{ company, position, years, description }]`
+  - `resumeUrl`, `headline`, `bio`, `githubUrl`, `linkedinUrl`
+  - *Decision*: Embedded because a seeker's skills and education naturally belong to their profile and are always fetched and displayed together with their account.
+- **Embedded `companyDetails` (Employer)**:
+  - `companyName`, `website`, `industry`, `location`, `aboutCompany`
+  - *Decision*: Embedded because an employer's company description belongs directly to their profile.
 
-## 🛠️ Tech Stack
+### 2. `Job` Model
+- **Fields**: `title`, `company`, `description`, `location`, `employmentType` (`Full-time`, `Part-time`, `Contract`, `Internship`, `Remote`), `salary` (embedded `{ min, max, currency, period }`), `requiredSkills`, `experienceRequirement`, `postedDate`, `applicationDeadline`, `jobStatus` (`Open`, `Closed`), `openings`, `applicantsCount`.
+- **Reference Relationship**:
+  - `employer` &rarr; References `User` (`ObjectId`).
+  - *Decision*: Reference because each job has its own independent lifecycle, can receive hundreds of applications, and needs to be queried and filtered platform-wide.
 
-- **Runtime Environment**: [Node.js](https://nodejs.org/) (v18+)
-- **Web Framework**: [Express.js](https://expressjs.com/) (v4.x)
-- **Database**: [MongoDB](https://www.mongodb.com/)
-- **Object Data Modeling (ODM)**: [Mongoose](https://mongoosejs.com/) (v8.x)
-- **Authentication**: [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) (JWT)
-- **Password Security**: [bcryptjs](https://github.com/dcodeIO/bcrypt.js)
-- **Cookie Parsing**: [cookie-parser](https://github.com/expressjs/cookie-parser)
-- **Environment Config**: [dotenv](https://github.com/motdotla/dotenv)
-- **CORS Handling**: [cors](https://github.com/expressjs/cors)
+### 3. `Application` Model
+- **Reference Relationships**:
+  - `job` &rarr; References `Job` (`ObjectId`).
+  - `applicant` &rarr; References `User` (Job Seeker `ObjectId`).
+  - `employer` &rarr; References `User` (Employer `ObjectId`).
+- **Embedded Data**:
+  - `applicantSnapshot`: `{ name, email, phone, headline, skills }` &mdash; Preserves the applicant's profile data at the time of application even if they edit their profile later!
+  - `statusHistory`: `[{ status, note, changedAt }]` &mdash; Audit trail of status transitions (e.g. Pending &rarr; Under Review &rarr; Shortlisted).
+- **Compound Unique Index**:
+  - `{ job: 1, applicant: 1 }` with `{ unique: true }` ensures a Job Seeker cannot apply for the same job multiple times.
 
 ---
 
-## ⚙️ Installation & Setup
+## 🔒 Authentication & Security Implementation
 
-### 1. Clone the repository
+1. **Password Hashing**:
+   - Mongoose `pre('save')` hook automatically generates a salt and hashes user passwords using `bcryptjs` before persisting to MongoDB.
+   - `matchPassword()` instance method performs secure timing-safe password comparison.
+   - Password fields use `select: false` so hashes are never exposed in API responses.
+2. **JWT Authentication & httpOnly Cookies**:
+   - `sendTokenResponse` utility signs a JWT containing the user's `id` and `role`.
+   - The token is placed into an `httpOnly: true` cookie (with `secure: true` in production) to prevent access from client-side JavaScript, protecting against XSS attacks.
+   - In addition, the token is returned in the response body to allow flexible testing in Postman using `Authorization: Bearer <token>`.
+3. **Role-Based Access Control Middleware**:
+   - `protect`: Extracts the token from cookies or the `Authorization` header, verifies validity with `jwt.verify`, checks if the user account is active, and attaches `req.user`.
+   - `authorize(...roles)`: Verifies if `req.user.role` is included in the allowed roles list; returns `403 Forbidden` if unauthorized.
+4. **Ownership Verification**:
+   - Employers can update or delete only their own job postings (`job.employer.toString() === req.user.id`).
+   - Employers can view applications only for jobs they own.
+   - Job Seekers can view and withdraw only their own applications.
+
+---
+
+## 📡 API Endpoints Reference
+
+### 🔐 1. Authentication Routes (`/api/auth`)
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `POST` | `/api/auth/register` | Public | Register new Job Seeker or Employer |
+| `POST` | `/api/auth/login` | Public | Authenticate user & receive JWT httpOnly cookie |
+| `POST` | `/api/auth/logout` | Private | Clear httpOnly authentication cookie |
+| `GET` | `/api/auth/me` | Private | Get currently logged-in user profile |
+
+### 👤 2. User Profile Routes (`/api/users`)
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `GET` | `/api/users/profile` | Private | View own profile |
+| `PUT` | `/api/users/profile` | Job Seeker | Update skills, education, experience, resume link |
+| `PUT` | `/api/users/company` | Employer | Update company details (name, website, location, about) |
+| `PUT` | `/api/users/change-password` | Private | Update account password (validates current password) |
+
+### 💼 3. Job Posting Routes (`/api/jobs`)
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `GET` | `/api/jobs` | Public | Search & filter jobs (keyword, category, location, salary) |
+| `GET` | `/api/jobs/:id` | Public | View a specific job posting by ID |
+| `GET` | `/api/jobs/my/listings` | Employer | View all jobs posted by the logged-in employer |
+| `POST` | `/api/jobs` | Employer | Create a new job posting |
+| `PUT` | `/api/jobs/:id` | Employer (owner) / Admin | Update own job posting |
+| `DELETE` | `/api/jobs/:id` | Employer (owner) / Admin | Delete own job posting and associated applications |
+
+### 📝 4. Job Application Routes (`/api/applications`)
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `POST` | `/api/applications/apply/:jobId` | Job Seeker | Apply for a job with resume URL and cover letter |
+| `GET` | `/api/applications/my` | Job Seeker | View my submitted applications and status |
+| `DELETE` | `/api/applications/:id` | Job Seeker | Withdraw a submitted application |
+| `GET` | `/api/applications/job/:jobId` | Employer (owner) / Admin | View applications received for a specific job |
+| `PUT` | `/api/applications/:id/status` | Employer (owner) / Admin | Update application status (Shortlist, Reject, etc.) |
+
+### 🛡️ 5. Admin Management Routes (`/api/admin`)
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `GET` | `/api/admin/stats` | Admin | Review platform metrics (users, jobs, applications) |
+| `GET` | `/api/admin/users` | Admin | View all registered users (with role filters) |
+| `GET` | `/api/admin/users/:id` | Admin | View a single user by ID |
+| `PUT` | `/api/admin/users/:id/status` | Admin | Update user status (active/inactive or change role) |
+| `DELETE` | `/api/admin/users/:id` | Admin | Delete a user when required |
+| `GET` | `/api/admin/jobs` | Admin | View all job postings platform-wide |
+| `GET` | `/api/admin/jobs/:id` | Admin | View a job posting by ID |
+| `DELETE` | `/api/admin/jobs/:id` | Admin | Remove inappropriate or invalid job postings |
+
+---
+
+## 💻 Installation & Setup
+
+### Prerequisites
+- Node.js (v18.0.0 or higher)
+- MongoDB instance (Local MongoDB or MongoDB Atlas URI)
+
+### Step 1: Clone the repository
 ```bash
 git clone https://github.com/Gunith08/Job-Portal.git
 cd Job-Portal
 ```
 
-### 2. Install dependencies
+### Step 2: Install dependencies
 ```bash
 npm install
 ```
 
-### 3. Configure environment variables
-Copy the `.env.example` file to `.env`:
-```bash
-cp .env.example .env
-```
-Inside `.env`, verify or customize your settings:
+### Step 3: Configure Environment Variables
+Create a `.env` file in the root folder (or copy from `.env.example`):
 ```env
 PORT=5000
 NODE_ENV=development
@@ -130,17 +214,13 @@ COOKIE_EXPIRE=7
 CLIENT_URL=http://localhost:3000
 ```
 
-### 4. Seed sample data (optional but recommended)
-Populate the database with sample Admins, Employers, Job Seekers, Jobs, and Applications:
+### Step 4: Seed the Database with Sample Data
+Populate the database with pre-configured Admins, Employers, Job Seekers, Jobs, and Applications:
 ```bash
 npm run seed
 ```
-To wipe all data from the database:
-```bash
-node seeder.js -d
-```
 
-### 5. Start the server
+### Step 5: Start the Server
 For development with auto-reload:
 ```bash
 npm run dev
@@ -149,11 +229,11 @@ For production:
 ```bash
 npm start
 ```
-The server will start listening at: `http://localhost:5000`
+The server will start listening on `http://localhost:5000`.
 
 ---
 
-## 🧪 Pre-configured Seed Credentials
+## 🔑 Database Seeder & Test Credentials
 
 | Role | Name | Email | Password |
 |---|---|---|---|
@@ -165,64 +245,34 @@ The server will start listening at: `http://localhost:5000`
 
 ---
 
-## 📡 API Endpoints Reference
+## 📮 Postman API Testing Guide
 
-### 🔐 Authentication (`/api/auth`)
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `POST` | `/api/auth/register` | Public | Register new Job Seeker or Employer |
-| `POST` | `/api/auth/login` | Public | Authenticate user & receive JWT cookie / token |
-| `POST` | `/api/auth/logout` | Private | Clear httpOnly authentication cookie |
-| `GET` | `/api/auth/me` | Private | Retrieve logged-in user profile details |
+The repository includes a ready-to-test Postman collection: **`Job_Portal_API.postman_collection.json`**.
 
-### 👤 User Profiles (`/api/users`)
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `PUT` | `/api/users/profile` | Job Seeker | Update skills, education, experience, resume link |
-| `PUT` | `/api/users/company` | Employer | Update company details (name, website, location, about) |
-| `PUT` | `/api/users/change-password` | Private | Change password verifying current password |
-
-### 💼 Job Listings (`/api/jobs`)
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/api/jobs` | Public | Search & filter all open jobs with pagination |
-| `GET` | `/api/jobs/:id` | Public | Get single job details by ID |
-| `GET` | `/api/jobs/my/listings` | Employer | Get all jobs posted by the logged-in employer |
-| `POST` | `/api/jobs` | Employer | Post a new job vacancy |
-| `PUT` | `/api/jobs/:id` | Employer / Admin | Update a job listing |
-| `DELETE` | `/api/jobs/:id` | Employer / Admin | Delete job listing and associated applications |
-
-### 📝 Job Applications (`/api/applications`)
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `POST` | `/api/applications/apply/:jobId` | Job Seeker | Submit application with resume & cover letter |
-| `GET` | `/api/applications/my` | Job Seeker | View my submitted applications & review status |
-| `DELETE` | `/api/applications/:id` | Job Seeker | Withdraw a submitted application |
-| `GET` | `/api/applications/job/:jobId` | Employer / Admin | View all candidates who applied for this job |
-| `PUT` | `/api/applications/:id/status` | Employer / Admin | Update applicant status (Shortlisted, Interviewing, Accepted, Rejected) |
-
-### 🛡️ Admin Management (`/api/admin`)
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/api/admin/stats` | Admin | Get platform metrics (users, jobs, applications breakdown) |
-| `GET` | `/api/admin/users` | Admin | List all registered users with role filter & pagination |
-| `PUT` | `/api/admin/users/:id/status` | Admin | Activate / deactivate a user account or change role |
-| `DELETE` | `/api/admin/users/:id` | Admin | Delete a user and cascade delete their jobs / applications |
+### How to test:
+1. Open **Postman**.
+2. Click **Import** and select `Job_Portal_API.postman_collection.json`.
+3. The collection is organized into 5 structured folders matching Section 9 of the project brief:
+   - **`1. Authentication & Session`**: Test registration, login for all 3 roles, session check (`/me`), and logout cookie removal.
+   - **`2. Security & Edge Case Tests (Section 9)`**:
+     - Test request without authentication (`401 Unauthorized`).
+     - Test request with invalid / expired token (`401 Unauthorized`).
+     - Test Job Seeker attempting to post a job (`403 Forbidden`).
+     - Test Employer attempting to apply for a job (`403 Forbidden`).
+     - Test Non-admin attempting to access admin analytics (`403 Forbidden`).
+     - Test invalid input and validation errors (`400 Bad Request`).
+   - **`3. Job Seeker Features`**: Profile viewing/updating, job search/filter, job application, duplicate application prevention (`400`), application tracking, and withdrawal.
+   - **`4. Employer Features`**: Company details update, creating job listings, viewing own jobs, updating job details, viewing applicants, updating applicant status (Shortlist/Reject), and deleting job listings.
+   - **`5. Admin Features`**: Platform statistics, viewing all users, user status update, user deletion, viewing all jobs, and removing inappropriate job postings.
+4. **Automated Token Management**: The login tests include test scripts that automatically save tokens into collection variables (`{{seekerToken}}`, `{{employerToken}}`, `{{adminToken}}`), eliminating manual copy/pasting!
 
 ---
 
-## 📬 Postman Testing
+## ✅ Submission Checklist (Section 10)
 
-1. Open Postman.
-2. Click **Import** and select the file [`Job_Portal_API.postman_collection.json`](./Job_Portal_API.postman_collection.json) located in the project root.
-3. The collection includes pre-configured collection variables:
-   - `baseUrl`: `http://localhost:5000/api`
-   - `token`: automatically populated whenever you execute any Login request in the **Authentication** folder!
-4. Test the flow:
-   - Run **Login - Job Seeker** or **Login - Employer**. The test script automatically saves the `token` variable.
-   - Run protected requests like **Create Job (Employer)** or **Apply for Job (Job Seeker)** without needing to manually copy/paste tokens!
-
----
-
-## 📜 License
-This project is open-source and available under the [MIT License](LICENSE).
+- [x] Complete Express.js backend source code.
+- [x] MongoDB database with appropriate Mongoose schemas and models.
+- [x] Environment configuration using `.env` (secrets safely excluded via `.gitignore`).
+- [x] Postman collection containing all required API tests (`Job_Portal_API.postman_collection.json`).
+- [x] Comprehensive README with setup instructions, API overview, roles, and design exercise explanations.
+- [x] Pushed to GitHub repository: [https://github.com/Gunith08/Job-Portal.git](https://github.com/Gunith08/Job-Portal.git)

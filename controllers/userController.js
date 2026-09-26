@@ -1,7 +1,22 @@
 ﻿// controllers/userController.js
-// Handles updating user profile, company profile, and password changes
+// Handles user profile viewing, profile updates, and password changes
 
 const User = require('../models/User');
+
+// @desc    View own profile
+// @route   GET /api/users/profile
+// @access  Private (Job Seeker / Employer / Admin)
+exports.getMyProfile = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // @desc    Update Job Seeker profile (skills, education, experience, resume, bio)
 // @route   PUT /api/users/profile
